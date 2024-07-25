@@ -942,6 +942,23 @@ pub mod pallet {
             // Return a successful DispatchResultWithPostInfo
             Ok(().into())
         }
+
+        /// Dispatchable extrinsic that allows anyone to slash a Storage Provider.
+        ///
+        /// Slashing a Storage Provider is only possible iff they are marked as slashable.
+        #[pallet::call_index(10)]
+        #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+        pub fn slash_storage_provider(
+            origin: OriginFor<T>,
+            who: T::AccountId,
+        ) -> DispatchResultWithPostInfo {
+            // Check that the extrinsic was sent with root origin.
+            ensure_root(origin)?;
+
+            Self::do_slash_storage_provider(&who)?;
+
+            Ok(().into())
+        }
     }
 }
 

@@ -704,6 +704,24 @@ where
         Ok(old_capacity)
     }
 
+    pub fn do_slash_storage_provider(
+        who: &T::AccountId,
+    ) -> DispatchResult {
+        // Check that the signer is registered as a SP
+        let msp_id = AccountIdToMainStorageProviderId::<T>::get(who);
+        let bsp_id = AccountIdToBackupStorageProviderId::<T>::get(who);
+        ensure!(msp_id.is_some() || bsp_id.is_some(), Error::<T>::NotRegistered);
+
+        // Slash held balance of SP
+        T::NativeBalance::slash(
+            &HoldReason::StorageProviderDeposit.into(),
+            who,
+            T::SlashRatio::get(),
+        )?;
+
+        Ok(())
+    }
+
     fn hold_balance(
         account_id: &T::AccountId,
         previous_deposit: BalanceOf<T>,
